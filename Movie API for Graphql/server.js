@@ -15,7 +15,8 @@ const typeDefs = gql`
     }
     type Query { # query에 넣은 모든 필드들은 user에 의해 request 됨
         allTweets: [Tweet!]!
-        tweet(id: ID!): Tweet!
+        tweet(id: ID!): Tweet
+        ping: String!
         # user가 어떤 Tweet을 말하는 것인지 모름! > 아규먼트 지정
     }
     type Mutation {
@@ -24,7 +25,19 @@ const typeDefs = gql`
     }
 `;
 
-const server = new ApolloServer({typeDefs})
+const resolvers = {
+    Query: {
+        tweet() {
+            console.log("I'm called"); 
+            return null;
+        },
+        ping() {
+            return "pong";
+        },
+    },
+};
+
+const server = new ApolloServer({typeDefs, resolvers})
 
 server.listen().then(({url}) => {
     console.log(`Running on ${url}`)
