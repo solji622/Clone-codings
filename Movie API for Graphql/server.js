@@ -5,10 +5,12 @@ let tweets = [
     {
         id:"1",
         text:"first one!",
+        userId: "2",
     },
     {
         id:"2",
         text:"second one",
+        userId: "3",
     },
 ]
 
@@ -30,8 +32,15 @@ const typeDefs = gql`
         id:ID!
         firstName: String!
         lastName: String!
+        """
+        Is the sum of firstName + lastName as a string
+        """
         fullName: String!
     }
+
+    """
+    Tweet object represents a resource for Tweet
+    """
     type Tweet {
         id:ID!
         text:String!
@@ -45,6 +54,9 @@ const typeDefs = gql`
     }
     type Mutation {
         postTweet(text: String!, userId: ID!): Tweet!
+        """
+        Deletes a Tweet if found, else returns false
+        """
         deleteTweet(id:ID!): Boolean #트윗 삭제 시 트윗 있으면 true, 없으면 false 리턴
     }
 `;
@@ -67,6 +79,7 @@ const resolvers = {
             const newTweet = {
                 id: tweets.length + 1,
                 text,
+                userId,
             };
             tweets.push(newTweet);
             return newTweet;
@@ -85,6 +98,15 @@ const resolvers = {
             return `${firstName} ${lastName}`;
         }
     },
+    Tweet: {
+        author({userId}) {
+            if(!users.find(user => user.id === userId)) {
+                console.log("error!");
+                return null;
+            }
+            return users.find(user => user.id === userId);
+        }
+    }
 };
 
 const server = new ApolloServer({typeDefs, resolvers})
