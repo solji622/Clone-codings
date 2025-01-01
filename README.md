@@ -5,7 +5,7 @@
 
 &nbsp;
 
-## 1. Movie API for Graphql ◻
+## 1. Movie API for Graphql ◼
 Graphql sql을 이용한 영화 API 제작
 
 &nbsp;
