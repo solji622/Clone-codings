@@ -1,4 +1,6 @@
-import {ApolloServer, gql} from "apollo-server";
+import { ApolloServer, gql } from "apollo-server";
+import fetch from "node-fetch";
+
 
 // 따옴표 아닌 백틱 사용
 let tweets = [
@@ -47,9 +49,11 @@ const typeDefs = gql`
         author: User
     }
     type Query { # query에 넣은 모든 필드들은 user에 의해 request 됨
+        allMovies: [Movie!]!
         allUsers: [User!]!
         allTweets: [Tweet!]!
         tweet(id: ID!): Tweet
+        movie(id: String!): Movie
         # user가 어떤 Tweet을 말하는 것인지 모름! > 아규먼트 지정
     }
     type Mutation {
@@ -58,6 +62,29 @@ const typeDefs = gql`
         Deletes a Tweet if found, else returns false
         """
         deleteTweet(id:ID!): Boolean #트윗 삭제 시 트윗 있으면 true, 없으면 false 리턴
+    }
+    type Movie {
+    id: Int!
+    url: String!
+    imdb_code: String!
+    title: String!
+    title_english: String!
+    title_long: String!
+    slug: String!
+    year: Int!
+    rating: Float!
+    runtime: Float!
+    genres: [String]!
+    summary: String
+    description_full: String!
+    synopsis: String
+    yt_trailer_code: String!
+    language: String!
+    background_image: String!
+    background_image_original: String!
+    small_cover_image: String!
+    medium_cover_image: String!
+    large_cover_image: String!
     }
 `;
 
@@ -73,6 +100,26 @@ const resolvers = {
             console.log("allUsers called!")
             return users;
         },
+        allMovies() {
+            return fetch("https://yts.mx/api/v2/list_movies.json"
+            ,{
+                headers: {
+                'Content-Type': 'application/json',
+                },
+                })
+            .then((r) => r.json())
+            .then((json) => json.data.movies);
+        },
+        movie(_, {id}) {
+            return fetch(`https://yts.mx/api/v2/movie_details.json?movie_id=${id}`
+            ,{
+                headers: {
+                'Content-Type': 'application/json',
+                },
+                })
+            .then((r) => r.json())
+            .then((json) => json.data.movie);
+        }
     },
     Mutation: {
         postTweet(_, {text, userId}) {
